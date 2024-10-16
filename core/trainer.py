@@ -4,10 +4,9 @@ import cv2
 import numpy as np
 from skimage.metrics import structural_similarity as compare_ssim
 from core.utils import preprocess, metrics
-import lpips
 import torch
 
-loss_fn_alex = lpips.LPIPS(net='alex')
+
 
 
 def train(model, ims, real_input_flag, configs, itr):
@@ -95,16 +94,16 @@ def test(model, test_input_handle, configs, itr):
                 img_gx[:, 1, :, :] = gx[:, :, :, 0]
                 img_gx[:, 2, :, :] = gx[:, :, :, 0]
             img_gx = torch.FloatTensor(img_gx)
-            lp_loss = loss_fn_alex(img_x, img_gx)
-            lp[i] += torch.mean(lp_loss).item()
 
             real_frm = np.uint8(x * 255)
             pred_frm = np.uint8(gx * 255)
 
             psnr[i] += metrics.batch_psnr(pred_frm, real_frm)
-            for b in range(configs.batch_size):
-                score, _ = compare_ssim(pred_frm[b], real_frm[b], full=True, multichannel=True)
-                ssim[i] += score
+
+
+            # for b in range(configs.batch_size):
+            #     score, _ = (pred_frm[b], real_frm[b])
+            #     ssim[i] += score
 
         # save prediction examples
         if batch_id <= configs.num_save_samples:
@@ -130,17 +129,14 @@ def test(model, test_input_handle, configs, itr):
     for i in range(configs.total_length - configs.input_length):
         print(img_mse[i] / (batch_id * configs.batch_size))
 
-    ssim = np.asarray(ssim, dtype=np.float32) / (configs.batch_size * batch_id)
-    print('ssim per frame: ' + str(np.mean(ssim)))
-    for i in range(configs.total_length - configs.input_length):
-        print(ssim[i])
+    # ssim = np.asarray(ssim, dtype=np.float32) / (configs.batch_size * batch_id)
+    # print('ssim per frame: ' + str(np.mean(ssim)))
+    # for i in range(configs.total_length - configs.input_length):
+    #     print(ssim[i])
 
     psnr = np.asarray(psnr, dtype=np.float32) / batch_id
     print('psnr per frame: ' + str(np.mean(psnr)))
     for i in range(configs.total_length - configs.input_length):
         print(psnr[i])
 
-    lp = np.asarray(lp, dtype=np.float32) / batch_id
-    print('lpips per frame: ' + str(np.mean(lp)))
-    for i in range(configs.total_length - configs.input_length):
-        print(lp[i])
+

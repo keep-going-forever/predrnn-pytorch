@@ -1,4 +1,4 @@
-export CUDA_VISIBLE_DEVICES=0
+export CUDA_VISIBLE_DEVICES=1
 cd ..
 python -u run.py \
     --is_training 1 \
@@ -6,9 +6,9 @@ python -u run.py \
     --dataset_name mnist \
     --train_data_paths /home/huangzhe/PrenRNN/data/moving-mnist-example/moving-mnist-train.npz \
     --valid_data_paths /home/huangzhe/PrenRNN/data/moving-mnist-example/moving-mnist-valid.npz \
-    --save_dir checkpoints/mnist_predrnn \
-    --gen_frm_dir results/mnist_predrnn \
-    --model_name predrnn \
+    --save_dir checkpoints/dam/mnist_predrnn \
+    --gen_frm_dir results/dam/mnist_predrnn \
+    --model_name dam \
     --reverse_input 1 \
     --img_width 64 \
     --img_channel 1 \
