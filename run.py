@@ -181,6 +181,8 @@ def train_wrapper(model):
         if train_input_handle.no_batch_left():
             train_input_handle.begin(do_shuffle=True)
         ims = train_input_handle.get_batch()
+        if np.max(ims)>1:
+            ims = ims/255.0
         ims = preprocess.reshape_patch(ims, args.patch_size)
 
         if args.reverse_scheduled_sampling == 1:

@@ -3,14 +3,6 @@ import cv2
 import numpy as np
 import random
 import rarfile
-import matplotlib.pyplot as plt
-
-
-import os
-import cv2
-import numpy as np
-import random
-import rarfile
 
 class InputHandle:
     def __init__(self, input_param):
@@ -45,13 +37,11 @@ class InputHandle:
                                 # 从rar文件中读取图片
                                 with rar.open(img_name) as img_file:
                                     # 解码并读取图片 (img_channel, img_height, img_width)
-                                    img = cv2.imdecode(np.frombuffer(img_file.read(), np.float), cv2.IMREAD_COLOR)
+                                    img = cv2.imdecode(np.frombuffer(img_file.read(), np.uint8), cv2.IMREAD_COLOR)
                                     # 调整图片大小为128x128
                                     img_resized = cv2.resize(img, self.target_size)
-                                    # 对图片进行归一化处理，将像素值从0-255转换到0-1
-                                    img_normalized = img_resized.astype(self.input_data_type) / 255.0
-                                    # 保存归一化后的图片
-                                    sample_images.append(img_normalized)
+                                    # 转换为 (img_height, img_width, img_channel)
+                                    sample_images.append(img_resized)
                             except Exception as e:
                                 print(f"Error reading {img_name}: {e}")
                         # 确保加载了15张图片
@@ -110,31 +100,33 @@ class InputHandle:
 
 
 
-# if __name__ == "__main__":
-#     from test_util.visualize_batch import visualize_batch
-#     # 定义输入参数
-#     input_param = {
-#         'paths': ['/home/huangzhe/PrenRNN/data/tianchi-example/train.rar'],  # 修改为实际文件路径
-#         'name': 'tianchi_dataset',
-#         'minibatch_size': 8,  # 每个批次大小
-#         'is_output_sequence': True,
-#         'input_data_type': 'float32',
-#         'output_data_type': 'float32'
-#     }
-#
-#     # 实例化 InputHandle 类
-#     input_handle = InputHandle(input_param)
-#
-#     # 开始新的批次处理
-#     input_handle.begin(do_shuffle=True)
-#
-#     # 获取一个批次数据
-#     i=0
-#     batch = input_handle.get_batch()
-#
-#
-#     # 打印或处理批次数据
-#     print(f"Batch shape: {batch.shape}")
-#     # 输入 (batch_size, seq_length, img_height, img_width, img_channel)
-#     print(f"Input batch sample: {batch[0, 0].shape}")
+if __name__ == "__main__":
+    from test_util.visualize_batch import visualize_batch
+    # 定义输入参数
+    input_param = {
+        'paths': ['/home/huangzhe/PrenRNN/data/tianchi-example/train.rar'],  # 修改为实际文件路径
+        'name': 'tianchi_dataset',
+        'minibatch_size': 8,  # 每个批次大小
+        'is_output_sequence': True,
+        'input_data_type': 'float32',
+        'output_data_type': 'float32'
+    }
+
+    # 实例化 InputHandle 类
+    input_handle = InputHandle(input_param)
+
+    # 开始新的批次处理
+    input_handle.begin(do_shuffle=True)
+
+    # 获取一个批次数据
+    i=0
+    batch = input_handle.get_batch()
+    print(np.max(batch))
+    print(batch.dtype)
+
+
+    # 打印或处理批次数据
+    print(f"Batch shape: {batch.shape}")
+    # 输入 (batch_size, seq_length, img_height, img_width, img_channel)
+    print(f"Input batch sample: {batch[0, 0].shape}")
 

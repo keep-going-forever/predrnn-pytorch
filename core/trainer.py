@@ -56,6 +56,8 @@ def test(model, test_input_handle, configs, itr):
     while (test_input_handle.no_batch_left() == False):
         batch_id = batch_id + 1
         test_ims = test_input_handle.get_batch()
+        if(np.max(test_ims)>1):
+            test_ims = test_ims / 255.0
         test_dat = preprocess.reshape_patch(test_ims, configs.patch_size)
         test_ims = test_ims[:, :, :, :, :configs.img_channel]
         img_gen = model.test(test_dat, real_input_flag)
