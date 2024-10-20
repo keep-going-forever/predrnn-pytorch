@@ -6,9 +6,9 @@ python -u run.py \
     --dataset_name tianchi \
     --train_data_paths /home/huangzhe/PrenRNN/data/tianchi-example/train.rar \
     --valid_data_paths /home/huangzhe/PrenRNN/data/tianchi-example/validation.rar \
-    --save_dir checkpoints/tianchi_dam \
-    --gen_frm_dir results/tianchi_dam \
-    --model_name dam \
+    --save_dir checkpoints/tianchi_predrnn \
+    --gen_frm_dir results/tianchi_predrnn \
+    --model_name predrnn \
     --reverse_input 1 \
     --img_width 100 \
     --img_channel 1 \

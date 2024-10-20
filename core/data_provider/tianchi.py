@@ -13,7 +13,7 @@ class InputHandle:
         self.output_data_type = input_param.get('output_data_type', 'float32')
         self.minibatch_size = input_param['minibatch_size']
         self.is_output_sequence = input_param['is_output_sequence']
-        self.target_size = (128, 128)  # 目标尺寸 128x128
+        self.target_size = (100, 100)  # 目标尺寸 128x128
         self.data = []
         self.indices = []
         self.current_position = 0
@@ -36,11 +36,12 @@ class InputHandle:
                             try:
                                 # 从rar文件中读取图片
                                 with rar.open(img_name) as img_file:
-                                    # 解码并读取图片 (img_channel, img_height, img_width)
-                                    img = cv2.imdecode(np.frombuffer(img_file.read(), np.uint8), cv2.IMREAD_COLOR)
+                                    # 解码并读取图片为灰度图 (height, width)
+                                    img = cv2.imdecode(np.frombuffer(img_file.read(), np.uint8), cv2.IMREAD_GRAYSCALE)
                                     # 调整图片大小为128x128
                                     img_resized = cv2.resize(img, self.target_size)
-                                    # 转换为 (img_height, img_width, img_channel)
+                                    # 添加通道维度 (height, width, 1)
+                                    img_resized = np.expand_dims(img_resized, axis=-1)
                                     sample_images.append(img_resized)
                             except Exception as e:
                                 print(f"Error reading {img_name}: {e}")
@@ -92,16 +93,17 @@ class InputHandle:
         return output_batch
 
     def get_batch(self):
-        input_seq = self.input_batch()
-        output_seq = self.output_batch()
+        input_seq = self.input_batch()  # (batch_size, 5, height, width, 1)
+        output_seq = self.output_batch()  # (batch_size, 10, height, width, 1)
+        # 拼接输入和输出序列 (batch_size, seq_length, height, width, channels)
         batch = np.concatenate((input_seq, output_seq), axis=1)
         return batch
 
 
 
 
+
 if __name__ == "__main__":
-    from test_util.visualize_batch import visualize_batch
     # 定义输入参数
     input_param = {
         'paths': ['/home/huangzhe/PrenRNN/data/tianchi-example/train.rar'],  # 修改为实际文件路径
