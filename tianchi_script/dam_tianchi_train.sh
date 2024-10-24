@@ -10,8 +10,8 @@ python -u run.py \
     --gen_frm_dir results/tianchi_dam \
     --model_name dam \
     --reverse_input 1 \
-    --img_width 128 \
-    --img_channel 3 \
+    --img_width 100 \
+    --img_channel 1 \
     --input_length 5 \
     --total_length 15 \
     --num_hidden 128,128,128,128 \
