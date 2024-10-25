@@ -126,7 +126,7 @@ def test(model, test_input_handle, configs, itr):
                 img_pd = np.uint8(img_pd * 255)
                 cv2.imwrite(file_name, img_pd)
 
-        save_radar_images(test_ims, img_out, batch_id, res_path, configs)
+        # save_radar_images(test_ims, img_out, batch_id, res_path, configs)
         test_input_handle.next()
 
     avg_mse = avg_mse / (batch_id * configs.batch_size)
