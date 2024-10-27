@@ -1,7 +1,7 @@
 import os
 import torch
 from torch.optim import Adam
-from core.models import predrnn, predrnn_v2, action_cond_predrnn, action_cond_predrnn_v2,dam,new_dam
+from core.models import predrnn, predrnn_v2, action_cond_predrnn, action_cond_predrnn_v2,dam,new_dam,sam
 
 class Model(object):
     def __init__(self, configs):
@@ -15,6 +15,7 @@ class Model(object):
             'action_cond_predrnn_v2': action_cond_predrnn_v2.RNN,
             'dam':dam.dam,
             'new_dam':new_dam.new_dam,
+            'sam':sam.sam,
         }
 
         if configs.model_name in networks_map:
