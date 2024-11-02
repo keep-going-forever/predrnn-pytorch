@@ -20,12 +20,12 @@ python -u run.py \
     --patch_size 4 \
     --layer_norm 0 \
     --scheduled_sampling 1 \
-    --sampling_stop_iter 5000 \
+    --sampling_stop_iter 20000 \
     --sampling_start_value 1.0 \
-    --sampling_changing_rate 0.0002 \
+    --sampling_changing_rate 0.00005 \
     --lr 0.0003 \
     --batch_size 8 \
-    --max_iterations 8000 \
+    --max_iterations 32000 \
     --display_interval 100 \
     --test_interval 500 \
     --snapshot_interval 500
