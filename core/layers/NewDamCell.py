@@ -71,7 +71,7 @@ class NewDamCell(nn.Module):
         new_m = f_m * m_t + i_m * g_m
 
         combined_o = torch.cat([x_t, attention,h_t,new_c, new_m], dim=1)
-        O_gate = torch.sigmoid(self.W_O(combined_o))
+        O_gate = torch.tanh(self.W_O(combined_o))
         combined_h = torch.cat([attention,new_c, new_m], dim=1)
         H_gate = torch.tanh(self.W_H(combined_h))
 
