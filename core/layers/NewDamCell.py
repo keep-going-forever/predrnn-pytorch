@@ -60,14 +60,14 @@ class NewDamCell(nn.Module):
         combined = torch.cat([x_t, attention, h_t], dim=1)
         C_gate = self.W_C(combined)
         i, f, g = torch.split(C_gate, self.num_hidden, dim=1)
-        i, f, g = torch.sigmoid(i), torch.sigmoid(f + self._forget_bias), torch.tanh(g)
+        i, f, g = torch.tanh(i), torch.tanh(f + self._forget_bias), torch.tanh(g)
         new_c = f * c_t + i * g
 
         combined_m = torch.cat([x_t, attention, m_t], dim=1)
         M_gate = self.W_M(combined_m)
         i_m, f_m, g_m = torch.split(M_gate, self.num_hidden, dim=1)
         #这里注意修改了什么
-        i_m, f_m, g_m = torch.sigmoid(i_m), torch.sigmoid(f_m + self._forget_bias), torch.tanh(g_m)
+        i_m, f_m, g_m = torch.tanh(i_m), torch.tanh(f_m + self._forget_bias), torch.tanh(g_m)
         new_m = f_m * m_t + i_m * g_m
 
         combined_o = torch.cat([x_t, attention,h_t,new_c, new_m], dim=1)
