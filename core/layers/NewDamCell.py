@@ -2,6 +2,7 @@ import torch
 import torch.nn as nn
 from typing import Tuple
 from core.composites.DAM.origin_attention import OriginSelfAttentionMemory
+from core.composites.DAM.cross_attention import CrossSelfAttentionMemory
 class NewDamCell(nn.Module):
     def __init__(self, in_channel, num_hidden, width, kernel_size, stride, layer_norm):
         super(NewDamCell, self).__init__()
@@ -45,7 +46,8 @@ class NewDamCell(nn.Module):
 
 
         # 引入 SelfAttentionMemory
-        self.attention = OriginSelfAttentionMemory(in_channel*2, num_hidden, width, kernel_size, stride, layer_norm)
+        # self.attention = OriginSelfAttentionMemory(in_channel*2, num_hidden, width, kernel_size, stride, layer_norm)
+        self.attention = CrossSelfAttentionMemory(in_channel, num_hidden, width, kernel_size, stride, layer_norm)
 
     def forward(self, x_t: torch.Tensor, h_t: torch.Tensor,
                 c_t: torch.Tensor, m_t: torch.Tensor, x_pre: torch.Tensor = None) -> Tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
@@ -54,8 +56,9 @@ class NewDamCell(nn.Module):
         # 初始化 x_pre 如果未提供
         if x_pre is None:
             x_pre = torch.zeros_like(x_t).to("cuda:0")
-        conbined_attention = torch.cat([x_t, x_pre], dim=1)
-        attention = self.attention(conbined_attention)
+        # conbined_attention = torch.cat([x_t, x_pre], dim=1)
+
+        attention,score = self.attention(x_t,x_pre)
         # 计算 C 门控
         combined = torch.cat([x_t, attention, h_t], dim=1)
         C_gate = self.W_C(combined)

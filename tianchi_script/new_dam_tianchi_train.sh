@@ -6,8 +6,8 @@ python -u run.py \
     --dataset_name tianchi \
     --train_data_paths /home/huangzhe/PrenRNN/data/tianchi-example/train.rar \
     --valid_data_paths /home/huangzhe/PrenRNN/data/tianchi-example/validation.rar \
-    --save_dir checkpoints/tianchi_new_dam \
-    --gen_frm_dir results/tianchi_new_dam \
+    --save_dir checkpoints/tianchi_new_dam_cross \
+    --gen_frm_dir results/tianchi_new_dam_cross \
     --model_name new_dam \
     --reverse_input 1 \
     --img_width 100 \
@@ -20,12 +20,12 @@ python -u run.py \
     --patch_size 4 \
     --layer_norm 0 \
     --scheduled_sampling 1 \
-    --sampling_stop_iter 20000 \
+    --sampling_stop_iter 50000 \
     --sampling_start_value 1.0 \
-    --sampling_changing_rate 0.00005 \
+    --sampling_changing_rate 0.00002 \
     --lr 0.0003 \
     --batch_size 8 \
-    --max_iterations 32000 \
-    --display_interval 100 \
-    --test_interval 500 \
-    --snapshot_interval 500
+    --max_iterations 100000 \
+    --display_interval 1000 \
+    --test_interval 5000 \
+    --snapshot_interval 5000

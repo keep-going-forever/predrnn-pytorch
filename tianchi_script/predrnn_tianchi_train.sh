@@ -1,4 +1,4 @@
-export CUDA_VISIBLE_DEVICES=1
+export CUDA_VISIBLE_DEVICES=0
 cd ..  # 如果需要返回到项目根目录
 python -u run.py \
     --is_training 1 \
@@ -20,12 +20,12 @@ python -u run.py \
     --patch_size 4 \
     --layer_norm 0 \
     --scheduled_sampling 1 \
-    --sampling_stop_iter 20000 \
+    --sampling_stop_iter 50000 \
     --sampling_start_value 1.0 \
-    --sampling_changing_rate 0.00005 \
+    --sampling_changing_rate 0.00002 \
     --lr 0.0003 \
     --batch_size 8 \
-    --max_iterations 32000 \
-    --display_interval 100 \
-    --test_interval 500 \
-    --snapshot_interval 500
+    --max_iterations 80000 \
+    --display_interval 1000 \
+    --test_interval 5000 \
+    --snapshot_interval 5000
