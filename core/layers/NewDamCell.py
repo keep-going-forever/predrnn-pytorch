@@ -1,8 +1,8 @@
 import torch
 import torch.nn as nn
 from typing import Tuple
-from core.composites.DAM.origin_attention import OriginSelfAttentionMemory
 from core.composites.DAM.cross_attention import CrossSelfAttentionMemory
+from core.composites.DAM.origin_attention import OriginSelfAttentionMemory
 class NewDamCell(nn.Module):
     def __init__(self, in_channel, num_hidden, width, kernel_size, stride, layer_norm):
         super(NewDamCell, self).__init__()
@@ -14,17 +14,17 @@ class NewDamCell(nn.Module):
         # 初始化卷积层
         if layer_norm:
             self.W_C = nn.Sequential(
-                nn.Conv2d(in_channel + num_hidden * 2, num_hidden * 3,
+                nn.Conv2d(in_channel + num_hidden * 3, num_hidden * 3,
                           kernel_size=kernel_size, stride=stride, padding=self.padding, bias=False),
                 nn.LayerNorm([num_hidden * 3, width, width])
             )
             self.W_M = nn.Sequential(
-                nn.Conv2d(in_channel + num_hidden * 2, num_hidden * 3,
+                nn.Conv2d(in_channel + num_hidden * 3, num_hidden * 3,
                           kernel_size=kernel_size, stride=stride, padding=self.padding, bias=False),
                 nn.LayerNorm([num_hidden * 3, width, width])
             )
             self.W_O = nn.Sequential(
-                nn.Conv2d(in_channel + num_hidden * 4, num_hidden,
+                nn.Conv2d(in_channel + num_hidden * 3, num_hidden,
                           kernel_size=kernel_size, stride=stride, padding=self.padding, bias=False),
                 nn.LayerNorm([num_hidden, width, width])
             )
@@ -34,16 +34,14 @@ class NewDamCell(nn.Module):
                 nn.LayerNorm([num_hidden, width, width])
             )
         else:
-            self.W_C = nn.Conv2d(in_channel + num_hidden * 2, num_hidden * 3,
+            self.W_C = nn.Conv2d(in_channel + num_hidden * 3, num_hidden * 3,
                                  kernel_size=kernel_size, stride=stride, padding=self.padding, bias=False)
-            self.W_M = nn.Conv2d(in_channel + num_hidden * 2, num_hidden * 3,
+            self.W_M = nn.Conv2d(in_channel + num_hidden * 3, num_hidden * 3,
                                  kernel_size=kernel_size, stride=stride, padding=self.padding, bias=False)
-            self.W_O = nn.Conv2d(in_channel + num_hidden * 4, num_hidden,
+            self.W_O = nn.Conv2d(in_channel + num_hidden * 3, num_hidden,
                                  kernel_size=kernel_size, stride=stride, padding=self.padding, bias=False)
             self.W_H = nn.Conv2d(num_hidden * 3, num_hidden,
                                  kernel_size=1, padding='same', bias=False)
-
-
 
         # 引入 SelfAttentionMemory
         # self.attention = OriginSelfAttentionMemory(in_channel*2, num_hidden, width, kernel_size, stride, layer_norm)
@@ -66,21 +64,17 @@ class NewDamCell(nn.Module):
         i, f, g = torch.sigmoid(i), torch.sigmoid(f + self._forget_bias), torch.tanh(g)
         new_c = f * c_t + i * g
 
-        combined_m = torch.cat([x_t, attention, m_t], dim=1)
+        combined_m = torch.cat([x_t, attention, m_t,new_c], dim=1)
         M_gate = self.W_M(combined_m)
         i_m, f_m, g_m = torch.split(M_gate, self.num_hidden, dim=1)
-        #这里注意修改了什么
         i_m, f_m, g_m = torch.sigmoid(i_m), torch.sigmoid(f_m + self._forget_bias), torch.tanh(g_m)
-        new_m = f_m * m_t + i_m * g_m
+        new_m = f_m * torch.tanh(m_t) + i_m * g_m
 
-        combined_o = torch.cat([x_t, attention,h_t,new_c, new_m], dim=1)
+        combined_o = torch.cat([x_t, attention, new_c, new_m], dim=1)
         O_gate = torch.tanh(self.W_O(combined_o))
-        combined_h = torch.cat([attention,new_c, new_m], dim=1)
+        combined_h = torch.cat([attention, new_c, new_m], dim=1)
         H_gate = torch.tanh(self.W_H(combined_h))
 
-        new_h = O_gate*H_gate
+        new_h = O_gate * H_gate
 
-
-
-
-        return new_h,new_c, new_m
+        return new_h, new_c, new_m

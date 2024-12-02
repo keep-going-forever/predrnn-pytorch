@@ -6,8 +6,8 @@ python -u run.py \
     --dataset_name tianchi \
     --train_data_paths /home/huangzhe/PrenRNN/data/tianchi-example/train.rar \
     --valid_data_paths /home/huangzhe/PrenRNN/data/tianchi-example/validation.rar \
-    --save_dir checkpoints/tianchi_new_dam_cross \
-    --gen_frm_dir results/tianchi_new_dam_cross \
+    --save_dir checkpoints/tianchi_new_dam_origin++ \
+    --gen_frm_dir results/tianchi_new_dam_origin++ \
     --model_name new_dam \
     --reverse_input 1 \
     --img_width 100 \
