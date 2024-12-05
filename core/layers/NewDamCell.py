@@ -58,7 +58,7 @@ class NewDamCell(nn.Module):
 
         attention,score = self.attention(x_t,x_pre)
         # 计算 C 门控
-        combined = torch.cat([x_t, attention, h_t], dim=1)
+        combined = torch.cat([x_t, attention, h_t,c_t], dim=1)
         C_gate = self.W_C(combined)
         i, f, g = torch.split(C_gate, self.num_hidden, dim=1)
         i, f, g = torch.sigmoid(i), torch.sigmoid(f + self._forget_bias), torch.tanh(g)

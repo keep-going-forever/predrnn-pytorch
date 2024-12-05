@@ -6,12 +6,25 @@ from skimage.metrics import structural_similarity as compare_ssim
 from core.utils import preprocess, metrics
 import torch
 from test_util.test_util import save_radar_images
+from sklearn.metrics import confusion_matrix
 
 
 
 
 def train(model, ims, real_input_flag, configs, itr):
-    cost = model.train(ims, real_input_flag)
+    if configs.is_regional:
+        try:
+            print("区域MSE计算")
+            cost = model.regional_train(ims, real_input_flag)
+        except Exception as e:
+            print(f"Error in regional_train: {e}")
+            raise  # 可以根据实际情况决定是直接抛出异常还是进行其他补救操作
+    else:
+        try:
+            cost = model.train(ims, real_input_flag)
+        except Exception as e:
+            print(f"Error in train: {e}")
+            raise
     if configs.reverse_input:
         ims_rev = np.flip(ims, axis=1).copy()
         cost += model.train(ims_rev, real_input_flag)
@@ -23,20 +36,34 @@ def train(model, ims, real_input_flag, configs, itr):
 
 
 def test(model, test_input_handle, configs, itr):
+
     print(datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'), 'test...')
     test_input_handle.begin(do_shuffle=False)
     res_path = os.path.join(configs.gen_frm_dir, str(itr))
     os.mkdir(res_path)
     avg_mse = 0
+    avg_mae = 0
     batch_id = 0
     img_mse, ssim, psnr = [], [], []
     lp = []
+
+    pod_per_frame = []
+    far_per_frame = []
+    csi_per_frame = []
+    hss_per_frame = []
+    mae_per_frame = []  # To store MAE for each frame
 
     for i in range(configs.total_length - configs.input_length):
         img_mse.append(0)
         ssim.append(0)
         psnr.append(0)
         lp.append(0)
+
+        pod_per_frame.append(0)
+        far_per_frame.append(0)
+        csi_per_frame.append(0)
+        hss_per_frame.append(0)
+        mae_per_frame.append(0)  # Initialize MAE for each frame
 
     # reverse schedule sampling
     if configs.reverse_scheduled_sampling == 1:
@@ -64,10 +91,10 @@ def test(model, test_input_handle, configs, itr):
         img_gen = model.test(test_dat, real_input_flag)
 
         img_gen = preprocess.reshape_patch_back(img_gen, configs.patch_size)
-        output_length = configs.total_length - configs.input_length 
+        output_length = configs.total_length - configs.input_length
         img_out = img_gen[:, -output_length:]
 
-        # MSE per frame
+        # MSE and MAE Calculation and Metrics for each frame
         for i in range(output_length):
             x = test_ims[:, i + configs.input_length, :, :, :]
             gx = img_out[:, i, :, :, :]
@@ -76,49 +103,51 @@ def test(model, test_input_handle, configs, itr):
             mse = np.square(x - gx).sum()
             img_mse[i] += mse
             avg_mse += mse
-            # cal lpips
-            img_x = np.zeros([configs.batch_size, 3, configs.img_width, configs.img_width])
-            if configs.img_channel == 3:
-                img_x[:, 0, :, :] = x[:, :, :, 0]
-                img_x[:, 1, :, :] = x[:, :, :, 1]
-                img_x[:, 2, :, :] = x[:, :, :, 2]
-            else:
-                img_x[:, 0, :, :] = x[:, :, :, 0]
-                img_x[:, 1, :, :] = x[:, :, :, 0]
-                img_x[:, 2, :, :] = x[:, :, :, 0]
-            img_x = torch.FloatTensor(img_x)
-            img_gx = np.zeros([configs.batch_size, 3, configs.img_width, configs.img_width])
-            if configs.img_channel == 3:
-                img_gx[:, 0, :, :] = gx[:, :, :, 0]
-                img_gx[:, 1, :, :] = gx[:, :, :, 1]
-                img_gx[:, 2, :, :] = gx[:, :, :, 2]
-            else:
-                img_gx[:, 0, :, :] = gx[:, :, :, 0]
-                img_gx[:, 1, :, :] = gx[:, :, :, 0]
-                img_gx[:, 2, :, :] = gx[:, :, :, 0]
-            img_gx = torch.FloatTensor(img_gx)
 
-            real_frm = np.uint8(x * 255)
-            pred_frm = np.uint8(gx * 255)
+            # MAE Calculation
+            mae = np.abs(x - gx).sum()
+            mae_per_frame[i] += mae
+            avg_mae += mae
 
-            psnr[i] += metrics.batch_psnr(pred_frm, real_frm)
+            # Binary classification for POD, FAR, CSI, and HSS
+            threshold = configs.binary_threshold  # Define a threshold for binary classification
+            x_binary = (x >= threshold).astype(int)
+            gx_binary = (gx >= threshold).astype(int)
 
+            # Loop through each batch and calculate confusion matrix
+            for b in range(configs.batch_size):
+                tn, fp, fn, tp = confusion_matrix(
+                    x_binary[b].flatten(), gx_binary[b].flatten(), labels=[0, 1]
+                ).ravel()
 
-            # for b in range(configs.batch_size):
-            #     score, _ = (pred_frm[b], real_frm[b])
-            #     ssim[i] += score
+                # Calculate POD, FAR, CSI, and HSS
+                pod = tp / (tp + fn) if (tp + fn) > 0 else 0
+                far = fp / (tp + fp) if (tp + fp) > 0 else 0
+                csi = tp / (tp + fn + fp) if (tp + fn + fp) > 0 else 0
+                hss = (
+                    2 * (tp * tn - fp * fn)
+                    / ((tp + fn) * (fn + tn) + (tp + fp) * (fp + tn))
+                    if ((tp + fn) * (fn + tn) + (tp + fp) * (fp + tn)) > 0
+                    else 0
+                )
 
-        # save prediction examples
+                # Accumulate per frame results
+                pod_per_frame[i] += pod
+                far_per_frame[i] += far
+                csi_per_frame[i] += csi
+                hss_per_frame[i] += hss
+
+        # Save prediction examples
         if batch_id <= configs.num_save_samples:
             path = os.path.join(res_path, str(batch_id))
             os.mkdir(path)
             for i in range(configs.total_length):
-                name = 'gt' + str(i + 1) + '.png'
+                name = f'gt{i + 1}.png'
                 file_name = os.path.join(path, name)
                 img_gt = np.uint8(test_ims[0, i, :, :, :] * 255)
                 cv2.imwrite(file_name, img_gt)
             for i in range(output_length):
-                name = 'pd' + str(i + 1 + configs.input_length) + '.png'
+                name = f'pd{i + 1 + configs.input_length}.png'
                 file_name = os.path.join(path, name)
                 img_pd = img_out[0, i, :, :, :]
                 img_pd = np.maximum(img_pd, 0)
@@ -126,22 +155,35 @@ def test(model, test_input_handle, configs, itr):
                 img_pd = np.uint8(img_pd * 255)
                 cv2.imwrite(file_name, img_pd)
 
-        # save_radar_images(test_ims, img_out, batch_id, res_path, configs)
         test_input_handle.next()
 
-    avg_mse = avg_mse / (batch_id * configs.batch_size)
-    print('mse per seq: ' + str(avg_mse))
-    for i in range(configs.total_length - configs.input_length):
-        print(img_mse[i] / (batch_id * configs.batch_size))
+    avg_mse /= (batch_id * configs.batch_size)
+    avg_mae /= (batch_id * configs.batch_size)
+    print('mse per seq:', avg_mse)
+    print('mae per seq:', avg_mae)
 
-    # ssim = np.asarray(ssim, dtype=np.float32) / (configs.batch_size * batch_id)
-    # print('ssim per frame: ' + str(np.mean(ssim)))
-    # for i in range(configs.total_length - configs.input_length):
-    #     print(ssim[i])
-
-    psnr = np.asarray(psnr, dtype=np.float32) / batch_id
-    print('psnr per frame: ' + str(np.mean(psnr)))
     for i in range(configs.total_length - configs.input_length):
-        print(psnr[i])
+        print(f'MSE per frame {i + 1}:', img_mse[i] / (batch_id * configs.batch_size))
+        print(f'MAE per frame {i + 1}:', mae_per_frame[i] / (batch_id * configs.batch_size))
+
+    # Display POD, FAR, CSI, HSS per frame
+    print('POD per frame:')
+    for i in range(configs.total_length - configs.input_length):
+        print(f'Frame {i + 1}:', pod_per_frame[i] / batch_id)
+
+    print('FAR per frame:')
+    for i in range(configs.total_length - configs.input_length):
+        print(f'Frame {i + 1}:', far_per_frame[i] / batch_id)
+
+    print('CSI per frame:')
+    for i in range(configs.total_length - configs.input_length):
+        print(f'Frame {i + 1}:', csi_per_frame[i] / batch_id)
+
+    print('HSS per frame:')
+    for i in range(configs.total_length - configs.input_length):
+        print(f'Frame {i + 1}:', hss_per_frame[i] / batch_id)
+
+
+
 
 

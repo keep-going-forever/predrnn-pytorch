@@ -1,7 +1,7 @@
 import os
 import torch
 from torch.optim import Adam
-from core.models import predrnn, predrnn_v2, action_cond_predrnn, action_cond_predrnn_v2,dam,new_dam,sam
+from core.models import predrnn, predrnn_v2, action_cond_predrnn, action_cond_predrnn_v2,dam,new_dam,sam,new_dam_loss
 
 class Model(object):
     def __init__(self, configs):
@@ -16,6 +16,7 @@ class Model(object):
             'dam':dam.dam,
             'new_dam':new_dam.new_dam,
             'sam':sam.sam,
+            'new_dam_loss':new_dam_loss.new_dam_loss,
         }
 
         if configs.model_name in networks_map:
@@ -44,6 +45,13 @@ class Model(object):
         self.optimizer.zero_grad()
         next_frames, loss = self.network(frames_tensor, mask_tensor)
         loss.backward()
+        self.optimizer.step()
+        return loss.detach().cpu().numpy()
+    def regional_train(self,frames,mask):
+        frames_tensor = torch.FloatTensor(frames).to(self.configs.device)
+        mask_tensor = torch.FloatTensor(mask).to(self.configs.device)
+        self.optimizer.zero_grad()
+        next_frames, loss = self.network(frames_tensor, mask_tensor)
         self.optimizer.step()
         return loss.detach().cpu().numpy()
 
