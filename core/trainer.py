@@ -47,10 +47,10 @@ def test(model, test_input_handle, configs, itr):
     img_mse, ssim, psnr = [], [], []
     lp = []
 
-    pod_per_frame = []
-    far_per_frame = []
-    csi_per_frame = []
-    hss_per_frame = []
+    # pod_per_frame = []
+    # far_per_frame = []
+    # csi_per_frame = []
+    # hss_per_frame = []
     mae_per_frame = []  # To store MAE for each frame
 
     for i in range(configs.total_length - configs.input_length):
@@ -59,10 +59,10 @@ def test(model, test_input_handle, configs, itr):
         psnr.append(0)
         lp.append(0)
 
-        pod_per_frame.append(0)
-        far_per_frame.append(0)
-        csi_per_frame.append(0)
-        hss_per_frame.append(0)
+        # pod_per_frame.append(0)
+        # far_per_frame.append(0)
+        # csi_per_frame.append(0)
+        # hss_per_frame.append(0)
         mae_per_frame.append(0)  # Initialize MAE for each frame
 
     # reverse schedule sampling
@@ -110,32 +110,32 @@ def test(model, test_input_handle, configs, itr):
             avg_mae += mae
 
             # Binary classification for POD, FAR, CSI, and HSS
-            threshold = configs.binary_threshold  # Define a threshold for binary classification
-            x_binary = (x >= threshold).astype(int)
-            gx_binary = (gx >= threshold).astype(int)
+            # threshold = configs.binary_threshold  # Define a threshold for binary classification
+            # x_binary = (x >= threshold).astype(int)
+            # gx_binary = (gx >= threshold).astype(int)
 
             # Loop through each batch and calculate confusion matrix
-            for b in range(configs.batch_size):
-                tn, fp, fn, tp = confusion_matrix(
-                    x_binary[b].flatten(), gx_binary[b].flatten(), labels=[0, 1]
-                ).ravel()
-
-                # Calculate POD, FAR, CSI, and HSS
-                pod = tp / (tp + fn) if (tp + fn) > 0 else 0
-                far = fp / (tp + fp) if (tp + fp) > 0 else 0
-                csi = tp / (tp + fn + fp) if (tp + fn + fp) > 0 else 0
-                hss = (
-                    2 * (tp * tn - fp * fn)
-                    / ((tp + fn) * (fn + tn) + (tp + fp) * (fp + tn))
-                    if ((tp + fn) * (fn + tn) + (tp + fp) * (fp + tn)) > 0
-                    else 0
-                )
-
-                # Accumulate per frame results
-                pod_per_frame[i] += pod
-                far_per_frame[i] += far
-                csi_per_frame[i] += csi
-                hss_per_frame[i] += hss
+            # for b in range(configs.batch_size):
+            #     tn, fp, fn, tp = confusion_matrix(
+            #         x_binary[b].flatten(), gx_binary[b].flatten(), labels=[0, 1]
+            #     ).ravel()
+            #
+            #     # Calculate POD, FAR, CSI, and HSS
+            #     pod = tp / (tp + fn) if (tp + fn) > 0 else 0
+            #     far = fp / (tp + fp) if (tp + fp) > 0 else 0
+            #     csi = tp / (tp + fn + fp) if (tp + fn + fp) > 0 else 0
+            #     hss = (
+            #         2 * (tp * tn - fp * fn)
+            #         / ((tp + fn) * (fn + tn) + (tp + fp) * (fp + tn))
+            #         if ((tp + fn) * (fn + tn) + (tp + fp) * (fp + tn)) > 0
+            #         else 0
+            #     )
+            #
+            #     # Accumulate per frame results
+            #     pod_per_frame[i] += pod
+            #     far_per_frame[i] += far
+            #     csi_per_frame[i] += csi
+            #     hss_per_frame[i] += hss
 
         # Save prediction examples
         if batch_id <= configs.num_save_samples:
@@ -164,24 +164,25 @@ def test(model, test_input_handle, configs, itr):
 
     for i in range(configs.total_length - configs.input_length):
         print(f'MSE per frame {i + 1}:', img_mse[i] / (batch_id * configs.batch_size))
-        print(f'MAE per frame {i + 1}:', mae_per_frame[i] / (batch_id * configs.batch_size))
+    for i in range(configs.total_length - configs.input_length):
+        print(f'MSE per frame {i + 1}:', img_mse[i] / (batch_id * configs.batch_size))
 
     # Display POD, FAR, CSI, HSS per frame
-    print('POD per frame:')
-    for i in range(configs.total_length - configs.input_length):
-        print(f'Frame {i + 1}:', pod_per_frame[i] / batch_id)
-
-    print('FAR per frame:')
-    for i in range(configs.total_length - configs.input_length):
-        print(f'Frame {i + 1}:', far_per_frame[i] / batch_id)
-
-    print('CSI per frame:')
-    for i in range(configs.total_length - configs.input_length):
-        print(f'Frame {i + 1}:', csi_per_frame[i] / batch_id)
-
-    print('HSS per frame:')
-    for i in range(configs.total_length - configs.input_length):
-        print(f'Frame {i + 1}:', hss_per_frame[i] / batch_id)
+    # print('POD per frame:')
+    # for i in range(configs.total_length - configs.input_length):
+    #     print(f'Frame {i + 1}:', pod_per_frame[i] / batch_id)
+    #
+    # print('FAR per frame:')
+    # for i in range(configs.total_length - configs.input_length):
+    #     print(f'Frame {i + 1}:', far_per_frame[i] / batch_id)
+    #
+    # print('CSI per frame:')
+    # for i in range(configs.total_length - configs.input_length):
+    #     print(f'Frame {i + 1}:', csi_per_frame[i] / batch_id)
+    #
+    # print('HSS per frame:')
+    # for i in range(configs.total_length - configs.input_length):
+    #     print(f'Frame {i + 1}:', hss_per_frame[i] / batch_id)
 
 
 

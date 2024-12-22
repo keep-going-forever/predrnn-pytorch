@@ -14,7 +14,8 @@ class new_dam_loss(nn.Module):
 
         # 计算宽度和高度
         width = configs.img_width // configs.patch_size
-        self.Region_mse_criterion = region_mse(config=configs)
+        # self.Region_mse_criterion = region_mse(config=configs)
+        self.Region_mse_criterion = nn.MSELoss()
 
         # 初始化 ns_sam_conv_cell 列表
         self.cell_list = nn.ModuleList([
@@ -39,7 +40,6 @@ class new_dam_loss(nn.Module):
         )
 
     def forward(self, frames_tensor, mask_true):
-        print('model : new_dam_loss')
         # [batch, length, height, width, channel] -> [batch, length, channel, height, width]
         frames = frames_tensor.permute(0, 1, 4, 2, 3).contiguous()
         mask_true = mask_true.permute(0, 1, 4, 2, 3).contiguous()

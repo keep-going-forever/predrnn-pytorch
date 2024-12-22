@@ -73,6 +73,7 @@ parser.add_argument('--num_action_ch', type=int, default=4, help='num action ch'
 #regional_mse
 parser.add_argument('--window_size', type=int, default=5)
 parser.add_argument('--is_regional', type=int, default=0)
+parser.add_argument('--binary_threshold',type=float,default=0)
 
 args = parser.parse_args()
 print(args)
