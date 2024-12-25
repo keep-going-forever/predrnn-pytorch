@@ -35,6 +35,7 @@ def train(model, ims, real_input_flag, configs, itr):
         print('training loss: ' + str(cost))
 
 
+import numpy as np
 
 
 def calculate_csi(predicted, true, threshold_min, threshold_max):
@@ -57,7 +58,10 @@ def calculate_csi(predicted, true, threshold_min, threshold_max):
 
     # 计算CSI
     csi = hit / denominator
+    print(csi)
     return csi
+
+
 
 
 def test(model, test_input_handle, configs, itr):
@@ -117,8 +121,7 @@ def test(model, test_input_handle, configs, itr):
         count_30_40 = np.sum((test_ims_scaled >= 30) & (test_ims_scaled < 40))
         count_above_40 = np.sum(test_ims_scaled >= 40)
 
-        print(f"Batch {batch_id} Data Distribution:")
-        print(f"0-10: {count_0_10}, 10-20: {count_10_20}, 20-30: {count_20_30}, 30-40: {count_30_40}, >40: {count_above_40}")
+
         test_dat = preprocess.reshape_patch(test_ims, configs.patch_size)
         test_ims = test_ims[:, :, :, :, :configs.img_channel]
         img_gen = model.test(test_dat, real_input_flag)
@@ -143,11 +146,11 @@ def test(model, test_input_handle, configs, itr):
             avg_mae += mae
 
             # CSI Calculation for current frame
-            csi_20_30 = calculate_csi(gx, x, 20, 30)
-            csi_30_40 = calculate_csi(gx, x, 30, 40)
+            # csi_20_30 = calculate_csi(gx, x, 20, 30)
+            # csi_30_40 = calculate_csi(gx, x, 30, 40)
             csi_above_40 = calculate_csi(gx, x, 40, np.inf)
-            csi_20_30_total += csi_20_30
-            csi_30_40_total += csi_30_40
+            # csi_20_30_total += csi_20_30
+            # csi_30_40_total += csi_30_40
             csi_above_40_total += csi_above_40
 
         # Save prediction examples

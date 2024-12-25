@@ -31,6 +31,8 @@ def data_provider(dataset_name, train_data_paths, valid_data_paths, batch_size,
             train_input_handle = datasets_map[dataset_name](train_input_param)
             train_input_handle.begin(do_shuffle=True)
             return train_input_handle, test_input_handle
+        else:
+            return test_input_handle
     if dataset_name == 'mnist':
         test_input_param = {'paths': valid_data_list,
                             'minibatch_size': batch_size,

@@ -1,13 +1,14 @@
 export CUDA_VISIBLE_DEVICES=1
 cd ..  # 如果需要返回到项目根目录
 python -u run.py \
-    --is_training 1 \
+    --is_training 0 \
     --device cuda \
     --dataset_name tianchi \
     --train_data_paths /home/huangzhe/PrenRNN/data/tianchi-example/train.rar \
     --valid_data_paths /home/huangzhe/PrenRNN/data/tianchi-example/validation.rar \
     --save_dir checkpoints/tianchi_predrnn \
     --gen_frm_dir results/tianchi_predrnn \
+    --pretrained_model /home/huangzhe/PrenRNN/checkpoints/tianchi_predrnn/model.ckpt-100000 \
     --model_name predrnn \
     --reverse_input 1 \
     --img_width 100 \
