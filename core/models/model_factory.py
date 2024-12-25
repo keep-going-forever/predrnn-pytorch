@@ -52,6 +52,7 @@ class Model(object):
         mask_tensor = torch.FloatTensor(mask).to(self.configs.device)
         self.optimizer.zero_grad()
         next_frames, loss = self.network(frames_tensor, mask_tensor)
+        loss.backward()
         self.optimizer.step()
         return loss.detach().cpu().numpy()
 

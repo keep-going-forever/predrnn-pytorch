@@ -14,7 +14,7 @@ from sklearn.metrics import confusion_matrix
 def train(model, ims, real_input_flag, configs, itr):
     if configs.is_regional:
         try:
-            print("区域MSE计算")
+            # print("区域MSE计算")
             cost = model.regional_train(ims, real_input_flag)
         except Exception as e:
             print(f"Error in regional_train: {e}")
@@ -35,8 +35,32 @@ def train(model, ims, real_input_flag, configs, itr):
         print('training loss: ' + str(cost))
 
 
-def test(model, test_input_handle, configs, itr):
 
+
+def calculate_csi(predicted, true, threshold_min, threshold_max):
+    # 将像素值乘以70（假设这是必要的转换）
+    predicted_scaled = predicted * 70
+    true_scaled = true * 70
+
+    # 计算命中（Hit）、误报（False Alarm）和漏报（Miss）
+    hit = np.sum((predicted_scaled >= threshold_min) & (predicted_scaled <= threshold_max) &
+                 (true_scaled >= threshold_min) & (true_scaled <= threshold_max))
+    false_alarm = np.sum((predicted_scaled >= threshold_min) & (predicted_scaled <= threshold_max) &
+                         ~(true_scaled >= threshold_min) & ~(true_scaled <= threshold_max))
+    miss = np.sum(~(predicted_scaled >= threshold_min) & ~(predicted_scaled <= threshold_max) &
+                  (true_scaled >= threshold_min) & (true_scaled <= threshold_max))
+
+    # 避免分母为零
+    denominator = hit + false_alarm + miss
+    if denominator == 0:
+        return np.nan  # 或者其他表示无效值的标志
+
+    # 计算CSI
+    csi = hit / denominator
+    return csi
+
+
+def test(model, test_input_handle, configs, itr):
     print(datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'), 'test...')
     test_input_handle.begin(do_shuffle=False)
     res_path = os.path.join(configs.gen_frm_dir, str(itr))
@@ -47,10 +71,6 @@ def test(model, test_input_handle, configs, itr):
     img_mse, ssim, psnr = [], [], []
     lp = []
 
-    # pod_per_frame = []
-    # far_per_frame = []
-    # csi_per_frame = []
-    # hss_per_frame = []
     mae_per_frame = []  # To store MAE for each frame
 
     for i in range(configs.total_length - configs.input_length):
@@ -58,11 +78,6 @@ def test(model, test_input_handle, configs, itr):
         ssim.append(0)
         psnr.append(0)
         lp.append(0)
-
-        # pod_per_frame.append(0)
-        # far_per_frame.append(0)
-        # csi_per_frame.append(0)
-        # hss_per_frame.append(0)
         mae_per_frame.append(0)  # Initialize MAE for each frame
 
     # reverse schedule sampling
@@ -81,11 +96,29 @@ def test(model, test_input_handle, configs, itr):
     if configs.reverse_scheduled_sampling == 1:
         real_input_flag[:, :configs.input_length - 1, :, :] = 1.0
 
-    while (test_input_handle.no_batch_left() == False):
+    csi_20_30_total = 0
+    csi_30_40_total = 0
+    csi_above_40_total = 0
+
+    while not test_input_handle.no_batch_left():
         batch_id = batch_id + 1
         test_ims = test_input_handle.get_batch()
-        if(np.max(test_ims)>1):
+
+
+
+        if np.max(test_ims) > 1:
             test_ims = test_ims / 255.0
+
+        # 统计数据分布
+        test_ims_scaled = test_ims * 70
+        count_0_10 = np.sum((test_ims_scaled >= 0) & (test_ims_scaled < 10))
+        count_10_20 = np.sum((test_ims_scaled >= 10) & (test_ims_scaled < 20))
+        count_20_30 = np.sum((test_ims_scaled >= 20) & (test_ims_scaled < 30))
+        count_30_40 = np.sum((test_ims_scaled >= 30) & (test_ims_scaled < 40))
+        count_above_40 = np.sum(test_ims_scaled >= 40)
+
+        print(f"Batch {batch_id} Data Distribution:")
+        print(f"0-10: {count_0_10}, 10-20: {count_10_20}, 20-30: {count_20_30}, 30-40: {count_30_40}, >40: {count_above_40}")
         test_dat = preprocess.reshape_patch(test_ims, configs.patch_size)
         test_ims = test_ims[:, :, :, :, :configs.img_channel]
         img_gen = model.test(test_dat, real_input_flag)
@@ -94,7 +127,7 @@ def test(model, test_input_handle, configs, itr):
         output_length = configs.total_length - configs.input_length
         img_out = img_gen[:, -output_length:]
 
-        # MSE and MAE Calculation and Metrics for each frame
+        # MSE, MAE, and CSI Calculation and Metrics for each frame
         for i in range(output_length):
             x = test_ims[:, i + configs.input_length, :, :, :]
             gx = img_out[:, i, :, :, :]
@@ -109,33 +142,13 @@ def test(model, test_input_handle, configs, itr):
             mae_per_frame[i] += mae
             avg_mae += mae
 
-            # Binary classification for POD, FAR, CSI, and HSS
-            # threshold = configs.binary_threshold  # Define a threshold for binary classification
-            # x_binary = (x >= threshold).astype(int)
-            # gx_binary = (gx >= threshold).astype(int)
-
-            # Loop through each batch and calculate confusion matrix
-            # for b in range(configs.batch_size):
-            #     tn, fp, fn, tp = confusion_matrix(
-            #         x_binary[b].flatten(), gx_binary[b].flatten(), labels=[0, 1]
-            #     ).ravel()
-            #
-            #     # Calculate POD, FAR, CSI, and HSS
-            #     pod = tp / (tp + fn) if (tp + fn) > 0 else 0
-            #     far = fp / (tp + fp) if (tp + fp) > 0 else 0
-            #     csi = tp / (tp + fn + fp) if (tp + fn + fp) > 0 else 0
-            #     hss = (
-            #         2 * (tp * tn - fp * fn)
-            #         / ((tp + fn) * (fn + tn) + (tp + fp) * (fp + tn))
-            #         if ((tp + fn) * (fn + tn) + (tp + fp) * (fp + tn)) > 0
-            #         else 0
-            #     )
-            #
-            #     # Accumulate per frame results
-            #     pod_per_frame[i] += pod
-            #     far_per_frame[i] += far
-            #     csi_per_frame[i] += csi
-            #     hss_per_frame[i] += hss
+            # CSI Calculation for current frame
+            csi_20_30 = calculate_csi(gx, x, 20, 30)
+            csi_30_40 = calculate_csi(gx, x, 30, 40)
+            csi_above_40 = calculate_csi(gx, x, 40, np.inf)
+            csi_20_30_total += csi_20_30
+            csi_30_40_total += csi_30_40
+            csi_above_40_total += csi_above_40
 
         # Save prediction examples
         if batch_id <= configs.num_save_samples:
@@ -159,6 +172,10 @@ def test(model, test_input_handle, configs, itr):
 
     avg_mse /= (batch_id * configs.batch_size)
     avg_mae /= (batch_id * configs.batch_size)
+    csi_20_30_total /= (batch_id * output_length)
+    csi_30_40_total /= (batch_id * output_length)
+    csi_above_40_total /= (batch_id * output_length)
+
     print('mse per seq:', avg_mse)
     print('mae per seq:', avg_mae)
 
@@ -167,22 +184,11 @@ def test(model, test_input_handle, configs, itr):
     for i in range(configs.total_length - configs.input_length):
         print(f'MSE per frame {i + 1}:', img_mse[i] / (batch_id * configs.batch_size))
 
-    # Display POD, FAR, CSI, HSS per frame
-    # print('POD per frame:')
-    # for i in range(configs.total_length - configs.input_length):
-    #     print(f'Frame {i + 1}:', pod_per_frame[i] / batch_id)
-    #
-    # print('FAR per frame:')
-    # for i in range(configs.total_length - configs.input_length):
-    #     print(f'Frame {i + 1}:', far_per_frame[i] / batch_id)
-    #
-    # print('CSI per frame:')
-    # for i in range(configs.total_length - configs.input_length):
-    #     print(f'Frame {i + 1}:', csi_per_frame[i] / batch_id)
-    #
-    # print('HSS per frame:')
-    # for i in range(configs.total_length - configs.input_length):
-    #     print(f'Frame {i + 1}:', hss_per_frame[i] / batch_id)
+    print(f'CSI (20-30): {csi_20_30_total}')
+    print(f'CSI (30-40): {csi_30_40_total}')
+    print(f'CSI (>40): {csi_above_40_total}')
+
+
 
 
 

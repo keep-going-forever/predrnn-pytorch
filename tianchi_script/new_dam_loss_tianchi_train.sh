@@ -1,4 +1,4 @@
-export CUDA_VISIBLE_DEVICES=1
+export CUDA_VISIBLE_DEVICES=0
 cd ..  # 如果需要返回到项目根目录
 python -u run.py \
     --is_training 1 \
@@ -6,8 +6,8 @@ python -u run.py \
     --dataset_name tianchi \
     --train_data_paths /home/huangzhe/PrenRNN/data/tianchi-example/train.rar \
     --valid_data_paths /home/huangzhe/PrenRNN/data/tianchi-example/validation.rar \
-    --save_dir checkpoints/tianchi_new_dam_loss \
-    --gen_frm_dir results/tianchi_new_dam_loss \
+    --save_dir checkpoints/tianchi_new_dam_loss_v1 \
+    --gen_frm_dir results/tianchi_new_dam_loss_v1 \
     --model_name new_dam_loss \
     --reverse_input 1 \
     --img_width 100 \
@@ -29,6 +29,6 @@ python -u run.py \
     --display_interval 1000 \
     --test_interval 5000 \
     --snapshot_interval 5000 \
-    --window_size 0 \
-    --is_regional 0 \
-    --binary_threshold 0
+    --stability_value 1e-6 \
+    --is_regional 1 \
+    --threshold 0.57

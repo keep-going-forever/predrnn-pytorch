@@ -71,9 +71,9 @@ parser.add_argument('--res_on_conv', type=int, default=0, help='res on conv')
 parser.add_argument('--num_action_ch', type=int, default=4, help='num action ch')
 
 #regional_mse
-parser.add_argument('--window_size', type=int, default=5)
+parser.add_argument('--stability_value', type=float, default=0.000001)
 parser.add_argument('--is_regional', type=int, default=0)
-parser.add_argument('--binary_threshold',type=float,default=0)
+parser.add_argument('--threshold',type=float,default=0.57)
 
 args = parser.parse_args()
 print(args)

@@ -2,6 +2,7 @@ import torch
 import torch.nn as nn
 from core.layers.NewDamCell import NewDamCell
 from core.loss_design.region_mse import region_mse
+from core.loss_design.CustomLoss import CustomLoss
 
 class new_dam_loss(nn.Module):
     def __init__(self, num_layers, num_hidden, configs):
@@ -15,7 +16,7 @@ class new_dam_loss(nn.Module):
         # 计算宽度和高度
         width = configs.img_width // configs.patch_size
         # self.Region_mse_criterion = region_mse(config=configs)
-        self.Region_mse_criterion = nn.MSELoss()
+        self.loss = CustomLoss(configs)
 
         # 初始化 ns_sam_conv_cell 列表
         self.cell_list = nn.ModuleList([
@@ -111,5 +112,5 @@ class new_dam_loss(nn.Module):
             next_frames.append(x_gen)
 
         next_frames = torch.stack(next_frames, dim=0).permute(1, 0, 3, 4, 2).contiguous()
-        loss = self.Region_mse_criterion(next_frames, frames_tensor[:, 1:])
+        loss = self.loss(next_frames, frames_tensor[:, 1:])
         return next_frames, loss
