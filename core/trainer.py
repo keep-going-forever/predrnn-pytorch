@@ -35,30 +35,42 @@ def train(model, ims, real_input_flag, configs, itr):
         print('training loss: ' + str(cost))
 
 
-import numpy as np
+
 
 
 def calculate_csi(predicted, true, threshold_min, threshold_max):
-    # 将像素值乘以70（假设这是必要的转换）
-    predicted_scaled = predicted * 70
-    true_scaled = true * 70
+    """
+    计算给定阈值范围内的CSI值。
 
-    # 计算命中（Hit）、误报（False Alarm）和漏报（Miss）
-    hit = np.sum((predicted_scaled >= threshold_min) & (predicted_scaled <= threshold_max) &
-                 (true_scaled >= threshold_min) & (true_scaled <= threshold_max))
-    false_alarm = np.sum((predicted_scaled >= threshold_min) & (predicted_scaled <= threshold_max) &
-                         ~(true_scaled >= threshold_min) & ~(true_scaled <= threshold_max))
-    miss = np.sum(~(predicted_scaled >= threshold_min) & ~(predicted_scaled <= threshold_max) &
-                  (true_scaled >= threshold_min) & (true_scaled <= threshold_max))
+    参数:
+    - predicted: 预测值的数组，形状为[batch, h, w, c]
+    - true: 真实值的数组，形状为[batch, h, w, c]
+    - threshold_min: 阈值的最小值
+    - threshold_max: 阈值的最大值
+
+    返回:
+    - csi: CSI值
+    """
+    # 确保输入的维度相同
+    assert predicted.shape == true.shape, "预测值和真实值的形状必须相同"
+    predicted = predicted*70
+    true = true*70
+
+    # 扩展阈值范围
+    pred_within_threshold = (predicted >= threshold_min) & (predicted < threshold_max)
+    true_within_threshold = (true >= threshold_min) & (true < threshold_max)
+
+    # 计算命中、误报和漏报
+    hit = np.sum(pred_within_threshold & true_within_threshold)
+    false_alarm = np.sum(pred_within_threshold & ~true_within_threshold)
+    miss = np.sum(~pred_within_threshold & true_within_threshold)
 
     # 避免分母为零
     denominator = hit + false_alarm + miss
     if denominator == 0:
-        return np.nan  # 或者其他表示无效值的标志
-
-    # 计算CSI
-    csi = hit / denominator
-    print(csi)
+        csi = 0  # 或者其他表示无效值的标志
+    else:
+        csi = hit / denominator
     return csi
 
 
@@ -146,11 +158,11 @@ def test(model, test_input_handle, configs, itr):
             avg_mae += mae
 
             # CSI Calculation for current frame
-            # csi_20_30 = calculate_csi(gx, x, 20, 30)
-            # csi_30_40 = calculate_csi(gx, x, 30, 40)
+            csi_20_30 = calculate_csi(gx, x, 20, 30)
+            csi_30_40 = calculate_csi(gx, x, 30, 40)
             csi_above_40 = calculate_csi(gx, x, 40, np.inf)
-            # csi_20_30_total += csi_20_30
-            # csi_30_40_total += csi_30_40
+            csi_20_30_total += csi_20_30
+            csi_30_40_total += csi_30_40
             csi_above_40_total += csi_above_40
 
         # Save prediction examples
