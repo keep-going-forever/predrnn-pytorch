@@ -6,8 +6,8 @@ python -u run.py \
     --dataset_name tianchi \
     --train_data_paths /home/huangzhe/PrenRNN/data/tianchi-example/train.rar \
     --valid_data_paths /home/huangzhe/PrenRNN/data/tianchi-example/validation.rar \
-    --save_dir checkpoints/tianchi_new_dam_loss_v1 \
-    --gen_frm_dir results/tianchi_new_dam_loss_v1 \
+    --save_dir checkpoints/tianchi_new_dam_loss_v2 \
+    --gen_frm_dir results/tianchi_new_dam_loss_v2 \
     --model_name new_dam_loss \
     --reverse_input 1 \
     --img_width 100 \
@@ -27,7 +27,7 @@ python -u run.py \
     --batch_size 8 \
     --max_iterations 100000 \
     --display_interval 1000 \
-    --test_interval 5000 \
+    --test_interval 1000 \
     --snapshot_interval 5000 \
     --stability_value 1e-6 \
     --is_regional 1 \
