@@ -6,8 +6,8 @@ python -u run.py \
     --dataset_name tianchi \
     --train_data_paths /home/huangzhe/PrenRNN/data/tianchi-example/train.rar \
     --valid_data_paths /home/huangzhe/PrenRNN/data/tianchi-example/validation.rar \
-    --save_dir checkpoints/tianchi_new_dam_loss_v2 \
-    --gen_frm_dir results/tianchi_new_dam_loss_v2 \
+    --save_dir checkpoints/tianchi_new_dam_loss_weight_region \
+    --gen_frm_dir results/tianchi_new_dam_loss_weight_region \
     --model_name new_dam_loss \
     --reverse_input 1 \
     --img_width 100 \

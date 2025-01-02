@@ -18,8 +18,8 @@ class RNN_Loss(nn.Module):
         cell_list = []
 
         width = configs.img_width // configs.patch_size
-        self.MSE_criterion = region_mse(configs)
-
+        # self.MSE_criterion = region_mse(configs)
+        self.loss = weight_region_mse(config=configs)
         for i in range(num_layers):
             in_channel = self.frame_channel if i == 0 else num_hidden[i - 1]
             cell_list.append(

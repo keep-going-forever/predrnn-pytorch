@@ -4,6 +4,7 @@ from core.layers.NewDamCell import NewDamCell
 from core.loss_design.region_mse import region_mse
 from core.loss_design.CustomLoss import CustomLoss
 from core.loss_design.RadarLoss import RadarLoss
+from core.loss_design.weight_region_mse import weight_region_mse
 
 class new_dam_loss(nn.Module):
     def __init__(self, num_layers, num_hidden, configs):
@@ -16,7 +17,8 @@ class new_dam_loss(nn.Module):
 
         # 计算宽度和高度
         width = configs.img_width // configs.patch_size
-        self.loss = region_mse(config=configs)
+        self.loss = weight_region_mse(config=configs)
+        # self.loss = region_mse(config=configs)
         # self.loss = CustomLoss(configs)
         # self.loss = RadarLoss()
 
