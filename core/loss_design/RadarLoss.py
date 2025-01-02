@@ -27,8 +27,8 @@ class RadarLoss(nn.Module):
                     weights[mask] = weights_segment
 
         # 计算加权后的MAE损失
-        weighted_mae = mae * weights
-        loss = weighted_mae.sum()
+        weighted_mae = weights * mae
+        loss = weighted_mae.mean()
 
         return loss
 
