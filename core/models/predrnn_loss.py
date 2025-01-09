@@ -5,6 +5,7 @@ import torch.nn as nn
 from core.layers.SpatioTemporalLSTMCell import SpatioTemporalLSTMCell
 from core.loss_design.RadarLoss import RadarLoss
 from core.loss_design.region_mse import region_mse
+from core.loss_design.weight_region_mse import weight_region_mse
 
 
 class RNN_Loss(nn.Module):
@@ -18,7 +19,7 @@ class RNN_Loss(nn.Module):
         cell_list = []
 
         width = configs.img_width // configs.patch_size
-        # self.MSE_criterion = region_mse(configs)
+        # self.loss = region_mse(configs)
         self.loss = weight_region_mse(config=configs)
         for i in range(num_layers):
             in_channel = self.frame_channel if i == 0 else num_hidden[i - 1]
@@ -74,5 +75,5 @@ class RNN_Loss(nn.Module):
 
         # [length, batch, channel, height, width] -> [batch, length, height, width, channel]
         next_frames = torch.stack(next_frames, dim=0).permute(1, 0, 3, 4, 2).contiguous()
-        loss = self.MSE_criterion(next_frames, frames_tensor[:, 1:])
+        loss = self.loss(next_frames, frames_tensor[:, 1:])
         return next_frames, loss

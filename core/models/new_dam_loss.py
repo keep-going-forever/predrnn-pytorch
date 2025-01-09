@@ -15,6 +15,7 @@ class new_dam_loss(nn.Module):
         self.num_hidden = num_hidden
         self.frame_channel = configs.patch_size * configs.patch_size * configs.img_channel
 
+
         # 计算宽度和高度
         width = configs.img_width // configs.patch_size
         self.loss = weight_region_mse(config=configs)
