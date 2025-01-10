@@ -1,7 +1,8 @@
 import os
 import torch
 from torch.optim import Adam
-from core.models import predrnn, predrnn_v2, action_cond_predrnn, action_cond_predrnn_v2,dam,new_dam,sam,new_dam_loss,predrnn_loss
+from core.models import predrnn, predrnn_v2, \
+    action_cond_predrnn, action_cond_predrnn_v2,dam,new_dam,sam,new_dam_loss,predrnn_loss,convlstm,predrnnpp
 
 class Model(object):
     def __init__(self, configs):
@@ -18,6 +19,8 @@ class Model(object):
             'sam':sam.sam,
             'new_dam_loss':new_dam_loss.new_dam_loss,
             'predrnn_loss':predrnn_loss.RNN_Loss,
+            'convlstm':convlstm.ConvLSTM,
+            'prenrnnpp':predrnnpp.RNNpp,
         }
 
         if configs.model_name in networks_map:
