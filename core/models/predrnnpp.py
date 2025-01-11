@@ -1,3 +1,6 @@
+import torch
+import torch.nn as nn
+from core.layers.CausalLSTMCell import CausalLSTMCell
 class RNNpp(nn.Module):
     def __init__(self, num_layers, num_hidden, configs):
         super(RNNpp, self).__init__()

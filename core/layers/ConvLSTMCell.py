@@ -1,14 +1,17 @@
+import torch
+import torch.nn as nn
 class ConvLSTMCell(nn.Module):
     def __init__(
-            self, in_channel, num_hidden, width, filter_size, stride, layer_norm
+            self, in_channel, num_hidden, width, filter_size, stride, layer_norm,DEVICE
     ) -> None:
         super(ConvLSTMCell, self).__init__()
 
         self.input_channels = in_channel
         self.hidden_channels = num_hidden
-        self.kernel_size = kernel_size
+        self.kernel_size = filter_size
         self.H = width
         self.W = width
+
 
         self.padding = filter_size // 2
 

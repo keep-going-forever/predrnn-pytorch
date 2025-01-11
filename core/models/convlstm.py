@@ -1,3 +1,5 @@
+import torch
+import torch.nn as nn
 from core.layers.ConvLSTMCell import ConvLSTMCell
 class ConvLSTM(nn.Module):
     def __init__(self, num_layers, num_hidden, configs):
@@ -16,7 +18,7 @@ class ConvLSTM(nn.Module):
             in_channel = self.frame_channel if i == 0 else num_hidden[i - 1]
             cell_list.append(
                 ConvLSTMCell(in_channel, num_hidden[i], width, configs.filter_size,
-                                       configs.stride, configs.layer_norm)
+                                       configs.stride, configs.layer_norm,configs.device)
             )
         self.cell_list = nn.ModuleList(cell_list)
         self.conv_last = nn.Conv2d(num_hidden[num_layers - 1], self.frame_channel,
