@@ -24,7 +24,6 @@ class weight_region_mse(nn.Module):
         Parameters:
         - input (Tensor): 预测图像，形状为 [batch_size, seq, h, w,c]
         - target (Tensor): 目标图像，形状为 [batch_size, seq, h, w,c]
-
         Returns:
         - Tensor: 计算出的损失值，形状依赖于 reduction 参数
         """

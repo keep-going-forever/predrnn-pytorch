@@ -29,4 +29,5 @@ python -u run.py \
     --display_interval 1000 \
     --test_interval 5000 \
     --is_regional 1 \
-    --snapshot_interval 5000
+    --snapshot_interval 5000 \
+    --window_size 5

@@ -7,7 +7,6 @@ class RadarLoss(nn.Module):
         super(RadarLoss, self).__init__()
 
     def forward(self, pred, target):
-
         # 计算每一个像素点的MAE
         mse = (pred - target) ** 2
         pred = pred * 70
