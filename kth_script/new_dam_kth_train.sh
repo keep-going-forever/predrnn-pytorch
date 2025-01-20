@@ -1,4 +1,4 @@
-export CUDA_VISIBLE_DEVICES=1
+export CUDA_VISIBLE_DEVICES=0
 cd ..
 python -u run.py \
     --is_training 1 \
@@ -6,9 +6,9 @@ python -u run.py \
     --dataset_name action \
     --train_data_paths /home/huangzhe/PrenRNN/data/kth_action/processed_128 \
     --valid_data_paths /home/huangzhe/PrenRNN/data/kth_action/processed_128 \
-    --save_dir checkpoints/kth_predrnn_v2 \
-    --gen_frm_dir results/kth_predrnn_v2 \
-    --model_name predrnn_v2 \
+    --save_dir checkpoints/kth_new_dam \
+    --gen_frm_dir results/kth_new_dam \
+    --model_name new_dam \
     --visual 0 \
     --reverse_input 1 \
     --img_width 128 \

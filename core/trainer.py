@@ -197,7 +197,7 @@ def test(model, test_input_handle, configs, itr):
     for i in range(configs.total_length - configs.input_length):
         print(f'MSE per frame {i + 1}:', img_mse[i] / (batch_id * configs.batch_size))
     for i in range(configs.total_length - configs.input_length):
-        print(f'MSE per frame {i + 1}:', img_mse[i] / (batch_id * configs.batch_size))
+        print(f'MAE per frame {i + 1}:', mae_per_frame[i] / (batch_id * configs.batch_size))
 
     print(f'CSI (20-30): {csi_20_30_total}')
     print(f'CSI (30-40): {csi_30_40_total}')

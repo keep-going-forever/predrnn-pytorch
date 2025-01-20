@@ -1,4 +1,4 @@
-export CUDA_VISIBLE_DEVICES=0
+export CUDA_VISIBLE_DEVICES=1
 cd ..
 python -u run.py \
     --is_training 1 \
@@ -20,9 +20,9 @@ python -u run.py \
     --patch_size 4 \
     --layer_norm 0 \
     --scheduled_sampling 1 \
-    --sampling_stop_iter 5000 \
+    --sampling_stop_iter 50000 \
     --sampling_start_value 1.0 \
-    --sampling_changing_rate 0.0002 \
+    --sampling_changing_rate 0.00002 \
     --lr 0.0003 \
     --batch_size 8 \
     --max_iterations 80000 \

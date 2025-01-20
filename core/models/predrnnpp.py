@@ -11,13 +11,14 @@ class RNNpp(nn.Module):
         self.num_layers = num_layers
         self.frame_size = configs.img_width // configs.patch_size
         cell_list = []
-
+        width = configs.img_width // configs.patch_size
         self.MSE_criterion = nn.MSELoss()
+        self.DEVICE = self.configs.device
 
         for i in range(num_layers):
             in_channel = self.input_dim if i == 0 else self.hidden_list[i - 1]
             cell_list.append(
-                CausalLSTMCell(in_channel, num_hidden[i], width, configs.filter_size,
+                CausalLSTMCell(in_channel, num_hidden[i],width , configs.filter_size,
                                        configs.stride, configs.layer_norm)
             )
         self.cell_list = nn.ModuleList(cell_list)
@@ -38,11 +39,11 @@ class RNNpp(nn.Module):
         c_t = []
 
         for i in range(self.num_layers):
-            zeros = torch.zeros([batch, self.hidden_list[i], height, width]).to(DEVICE)
+            zeros = torch.zeros([batch, self.hidden_list[i], height, width]).to(self.DEVICE)
             h_t.append(zeros)
             c_t.append(zeros)
 
-        memory = torch.zeros([batch, self.hidden_list[0], height, width]).to(DEVICE)
+        memory = torch.zeros([batch, self.hidden_list[0], height, width]).to(self.DEVICE)
 
         for t in range(seq - 1):
             if t < 10:
@@ -62,7 +63,7 @@ class RNNpp(nn.Module):
             next_frames.append(x_gen)
 
         # [length, batch, channel, height, width] -> [batch, length, height, width, channel]
-        next_frames = torch.stack(next_frames, dim=0).permute(1, 0, 2,3,4).contiguous()
-        # loss = self.MSE_criterion(next_frames, frames[:, 1:])
+        next_frames = torch.stack(next_frames, dim=0).permute(1, 0, 3,4,2).contiguous()
+        loss = self.MSE_criterion(next_frames, frames[:, 1:])
         # print("每一个的loss",loss)
-        return next_frames
+        return next_frames,loss

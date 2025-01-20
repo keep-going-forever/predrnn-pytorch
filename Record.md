@@ -45,3 +45,35 @@ CSI (20-30): 0.7520255239457706
 CSI (30-40): 0.6154272233356319
 CSI (>40): 0.29699782096365
 
+--------------------------------------------------------------------------------------
+2025-01-14 12:08:09 itr: 75000
+training loss: 0.007545551750808954
+save model to checkpoints/mnist_predrnn/model.ckpt-75000
+2025-01-14 12:08:09 test...
+mse per seq: 548.105637776325
+mae per seq: 1178.7009318095133
+
+2025-01-15 00:01:30 itr: 65000
+training loss: 0.006750458851456642
+save model to checkpoints/sam/mnist/model.ckpt-65000
+2025-01-15 00:01:30 test...
+mse per seq: 505.0176120627836
+mae per seq: 1126.7418913477395
+
+2025-01-16 08:04:51 itr: 60000
+training loss: 0.00503311213105917
+save model to checkpoints/new_dam/mnist_predrnn/model.ckpt-60000
+2025-01-16 08:04:51 test...
+mse per seq: 517.7745102418953
+mae per seq: 1115.452736804763
+
+2025-01-18 21:18:48 itr: 70000
+training loss: 0.0058107683435082436
+save model to checkpoints/mnist_predrnn_v2/model.ckpt-70000
+2025-01-18 21:18:48 test...
+mse per seq: 516.8667707634738
+mae per seq: 1106.126785630682
+
+
+
+

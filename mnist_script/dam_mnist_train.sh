@@ -6,8 +6,8 @@ python -u run.py \
     --dataset_name mnist \
     --train_data_paths /home/huangzhe/PrenRNN/data/moving-mnist-example/moving-mnist-train.npz \
     --valid_data_paths /home/huangzhe/PrenRNN/data/moving-mnist-example/moving-mnist-valid.npz \
-    --save_dir checkpoints/dam/mnist_predrnn \
-    --gen_frm_dir results/dam/mnist_predrnn \
+    --save_dir checkpoints/mnist_dam \
+    --gen_frm_dir results/mnist_dam \
     --model_name dam \
     --reverse_input 1 \
     --img_width 64 \
@@ -20,12 +20,12 @@ python -u run.py \
     --patch_size 4 \
     --layer_norm 0 \
     --scheduled_sampling 1 \
-    --sampling_stop_iter 5000 \
+    --sampling_stop_iter 50000 \
     --sampling_start_value 1.0 \
-    --sampling_changing_rate 0.0002 \
+    --sampling_changing_rate 0.00002 \
     --lr 0.0003 \
     --batch_size 8 \
-    --max_iterations 8000 \
-    --display_interval 100 \
-    --test_interval 500 \
-    --snapshot_interval 500
+    --max_iterations 80000 \
+    --display_interval 1000 \
+    --test_interval 5000 \
+    --snapshot_interval 5000

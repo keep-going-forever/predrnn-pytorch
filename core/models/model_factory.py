@@ -20,7 +20,7 @@ class Model(object):
             'new_dam_loss':new_dam_loss.new_dam_loss,
             'predrnn_loss':predrnn_loss.RNN_Loss,
             'convlstm':convlstm.ConvLSTM,
-            'prenrnnpp':predrnnpp.RNNpp,
+            'predrnnpp':predrnnpp.RNNpp,
         }
 
         if configs.model_name in networks_map:

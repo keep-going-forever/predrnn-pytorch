@@ -12,7 +12,6 @@ class ConvLSTMCell(nn.Module):
         self.H = width
         self.W = width
 
-
         self.padding = filter_size // 2
 
         self.Wxi = nn.Conv2d(self.input_channels, self.hidden_channels, self.kernel_size, padding=self.padding,stride=stride)

@@ -4,8 +4,8 @@ python -u run.py \
     --is_training 1 \
     --device cuda \
     --dataset_name action \
-    --train_data_paths /workspace/wuhaixu/predrnn/data/kth_action \
-    --valid_data_paths /workspace/wuhaixu/predrnn/data/kth_action \
+    --train_data_paths /home/huangzhe/PrenRNN/data/kth_action \
+    --valid_data_paths /home/huangzhe/PrenRNN/data/kth_action \
     --save_dir checkpoints/kth_predrnn \
     --gen_frm_dir results/kth_predrnn \
     --model_name predrnn \
@@ -26,6 +26,6 @@ python -u run.py \
     --lr 0.0003 \
     --batch_size 4 \
     --max_iterations 80000 \
-    --display_interval 100 \
+    --display_interval 1000 \
     --test_interval 5000 \
     --snapshot_interval 5000

@@ -184,8 +184,19 @@ class DataProcess:
             seq_start_idx = seq_end_idx - self.seq_len + 1
             if frames_person_mark[seq_end_idx] == frames_person_mark[seq_start_idx]:
                 # Get person ID at the start and end of this sequence (of seq_len)
-                end = int(frames_file_name[seq_end_idx][6:10])
-                start = int(frames_file_name[seq_start_idx][6:10])
+                # 假设 frames_file_name[seq_end_idx] 是类似 'some_prefix230.ext' 的字符串
+                frame_str_end = frames_file_name[seq_end_idx][6:10]  # 获取 '230.'
+                # 检查并去除可能的小数点
+                if '.' in frame_str_end:
+                    frame_str = frame_str_end.split('.')[0]  # 只取小数点前的部分
+                end = int(frame_str)  # 现在应该可以安全转换为整数了
+
+                frame_str_start = frames_file_name[seq_start_idx][6:10]
+                if '.' in frame_str_start:
+                    frame_str_start = frame_str_start.split('.')[0]  # 只取小数点前的部分
+                start = int(frame_str_start)
+                # end = int(frames_file_name[seq_end_idx][6:10])
+                # start = int(frames_file_name[seq_start_idx][6:10])
                 
                 # TODO: mode == 'test'
                 if end - start == self.seq_len - 1:

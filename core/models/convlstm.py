@@ -11,6 +11,7 @@ class ConvLSTM(nn.Module):
         self.num_hidden = num_hidden
         cell_list = []
 
+
         width = configs.img_width // configs.patch_size
         self.MSE_criterion = nn.MSELoss()
 
