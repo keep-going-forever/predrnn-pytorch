@@ -9,7 +9,6 @@ python -u run.py \
     --save_dir checkpoints/kth_new_dam \
     --gen_frm_dir results/kth_new_dam \
     --model_name new_dam \
-    --visual 0 \
     --reverse_input 1 \
     --img_width 128 \
     --img_channel 1 \
@@ -20,15 +19,13 @@ python -u run.py \
     --stride 1 \
     --patch_size 4 \
     --layer_norm 0 \
-    --decouple_beta 0.01 \
-    --reverse_scheduled_sampling 1 \
-    --r_sampling_step_1 5000 \
-    --r_sampling_step_2 50000 \
-    --r_exp_alpha 2000 \
-    --lr 0.0001 \
+    --scheduled_sampling 1 \
+    --sampling_stop_iter 50000 \
+    --sampling_start_value 1.0 \
+    --sampling_changing_rate 0.00002 \
+    --lr 0.0003 \
     --batch_size 4 \
     --max_iterations 80000 \
     --display_interval 1000 \
     --test_interval 5000 \
-    --snapshot_interval 5000 \
-#    --pretrained_model ./checkpoints/kth_predrnn_v2/kth_model.ckpt
+    --snapshot_interval 5000

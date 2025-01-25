@@ -74,6 +74,11 @@ save model to checkpoints/mnist_predrnn_v2/model.ckpt-70000
 mse per seq: 516.8667707634738
 mae per seq: 1106.126785630682
 
+-------------------------------------------------------------------
+save model to checkpoints/kth_sam/model.ckpt-80000
+2025-01-23 20:37:20 test...
+mse per seq: 190.56622465778435
+mae per seq: 2538.7419760297325
 
 
 
